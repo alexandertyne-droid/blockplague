@@ -19,8 +19,11 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+      - name: Install Gradle 8.8
+        run: |
+          wget -q https://services.gradle.org/distributions/gradle-8.8-bin.zip
+          unzip -q gradle-8.8-bin.zip -d /opt/gradle
+          echo "/opt/gradle/gradle-8.8/bin" >> $GITHUB_PATH
 
       - name: Generate Gradle wrapper
         run: gradle wrapper --gradle-version 8.8
