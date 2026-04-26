@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "id": "blockplague",
+  "version": "${version}",
+  "name": "Block Plague",
+  "description": "Spread any block across the world with configurable speed!",
+  "authors": ["BlockPlague"],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/blockplague/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.blockplague.BlockPlagueMod"
+    ]
+  },
+  "mixins": [],
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": "~1.21.1",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
