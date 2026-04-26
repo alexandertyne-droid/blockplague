@@ -81,8 +81,27 @@ public class PlagueManager {
         spreadAccumulator = 0.0;
         worldKey = dimensionKey;
         active = true;
-        frontier.add(origin);
-        BlockPlagueMod.LOGGER.info("Plague started at {} in {}", origin, dimensionKey);
+
+        // Mark origin as already handled and seed frontier with all its neighbours
+        // This way even if the origin is air or already the plague block, spreading still begins
+        converted.add(origin);
+
+        // Get the world and seed neighbours
+        ServerWorld world = getWorld(server);
+        if (world != null) {
+            // Convert the origin block itself
+            world.setBlockState(origin, plagueBlock.getDefaultState(), Block.NOTIFY_ALL);
+            // Add all neighbours to frontier
+            for (BlockPos neighbour : getNeighbours(origin)) {
+                if (!converted.contains(neighbour)) {
+                    frontier.add(neighbour);
+                }
+            }
+        } else {
+            frontier.add(origin);
+        }
+
+        BlockPlagueMod.LOGGER.info("Plague started at {} in {}, frontier size: {}", origin, dimensionKey, frontier.size());
     }
 
     public void stopPlague() {
@@ -188,14 +207,11 @@ public class PlagueManager {
             // Convert this block
             convertBlock(world, pos);
 
-            // Add valid neighbours to frontier
+            // Add all neighbours to frontier regardless of what they are
+            // so the plague can spread across any terrain
             for (BlockPos neighbour : getNeighbours(pos)) {
                 if (!converted.contains(neighbour) && !frontier.contains(neighbour)) {
-                    BlockState neighbourState = world.getBlockState(neighbour);
-                    // Don't spread into air or already-plague blocks
-                    if (!neighbourState.isAir() && neighbourState.getBlock() != plagueBlock) {
-                        frontier.add(neighbour);
-                    }
+                    frontier.add(neighbour);
                 }
             }
         }
@@ -206,11 +222,10 @@ public class PlagueManager {
         converted.add(pos);
 
         BlockState state = world.getBlockState(pos);
-        // Don't convert air or the plague block itself
-        if (state.isAir() || state.getBlock() == plagueBlock) return;
-
-        // Also spread onto blocks below/above
-        world.setBlockState(pos, plagueBlock.getDefaultState(), Block.NOTIFY_ALL);
+        // Only convert solid blocks, skip air
+        if (!state.isAir()) {
+            world.setBlockState(pos, plagueBlock.getDefaultState(), Block.NOTIFY_ALL);
+        }
     }
 
     private List<BlockPos> getNeighbours(BlockPos pos) {
