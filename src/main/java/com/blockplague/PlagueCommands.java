@@ -75,23 +75,6 @@ public class PlagueCommands {
                     )
                 )
 
-                // /plague select  — next block you place becomes the plague block
-                .then(literal("select")
-                    .executes(ctx -> {
-                        var source = ctx.getSource();
-                        var player = source.getPlayer();
-                        if (player == null) {
-                            source.sendError(Text.literal("Must be run by a player."));
-                            return 0;
-                        }
-                        PlagueManager.getInstance().startSelecting(player);
-                        source.sendFeedback(() -> Text.literal(
-                            "§6[Block Plague] §ePlace any block to set it as the plague block."
-                        ), false);
-                        return 1;
-                    })
-                )
-
                 // /plague setrate <rate> <unit>
                 // Units: blocks_per_second, blocks_per_minute, blocks_per_hour, blocks_per_day
                 .then(literal("setrate")
