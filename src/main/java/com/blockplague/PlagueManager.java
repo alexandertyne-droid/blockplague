@@ -121,20 +121,29 @@ public class PlagueManager {
     // ── Block placement hook ──────────────────────────────────────────────────
 
     public ActionResult onBlockUse(PlayerEntity player, World world, Hand hand, BlockHitResult hitResult) {
-        if (world.isClient()) return ActionResult.PASS;
-        if (!isSelecting(player)) return ActionResult.PASS;
+        try {
+            if (world.isClient()) return ActionResult.PASS;
+            if (player == null || hand == null) return ActionResult.PASS;
+            if (!isSelecting(player)) return ActionResult.PASS;
 
-        // The item in hand should be a block item
-        var stack = player.getStackInHand(hand);
-        if (stack.getItem() instanceof net.minecraft.item.BlockItem blockItem) {
-            plagueBlock = blockItem.getBlock();
-            selectingPlayers.remove(player.getUuid());
-            player.sendMessage(Text.literal(
-                "§6[Block Plague] §aPlague block set to: §e" + blockItem.getBlock().getName().getString()
-            ), false);
-            return ActionResult.PASS; // still allow the block to place normally
+            // The item in hand should be a block item
+            var stack = player.getStackInHand(hand);
+            if (stack == null || stack.isEmpty()) return ActionResult.PASS;
+
+            var item = stack.getItem();
+            if (item instanceof net.minecraft.item.BlockItem blockItem) {
+                var block = blockItem.getBlock();
+                if (block != null) {
+                    plagueBlock = block;
+                    selectingPlayers.remove(player.getUuid());
+                    player.sendMessage(Text.literal(
+                        "§6[Block Plague] §aPlague block set to: §e" + block.getName().getString()
+                    ), false);
+                }
+            }
+        } catch (Exception e) {
+            BlockPlagueMod.LOGGER.warn("Block Plague: error in onBlockUse, ignoring: " + e.getMessage());
         }
-
         return ActionResult.PASS;
     }
 
